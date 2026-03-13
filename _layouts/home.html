@@ -7,21 +7,26 @@ layout: default
     <p class="eyebrow">Learning Journal</p>
     <h1>把每一篇学习日记，沉淀成可以检索的个人知识轨迹。</h1>
     <p class="hero__lead">
-      所有日记都放在单独的 Markdown 文件里，页面会自动渲染内容、汇总标签，并支持按标签筛选。
+      所有日记都放在单独的 Markdown 文件里。首页更适合长期积累：按标签筛选、按关键词搜索、每页 20 篇翻阅。
     </p>
     <div class="hero__actions">
       <a class="button" href="#notes">开始浏览</a>
-      <a class="button button--ghost" href="{{ '/tags/' | relative_url }}">看标签地图</a>
+      <a class="button button--ghost" href="{{ site.baseurl }}/tags/">看标签地图</a>
     </div>
-  </div>
-  <div class="hero__panel">
-    <p class="panel__label">当前结构</p>
-    <ul class="stack-list">
-      <li><strong>内容层</strong><span>`_notes/` 中的 Markdown 日记</span></li>
-      <li><strong>布局层</strong><span>`_layouts/` 控制页面渲染</span></li>
-      <li><strong>交互层</strong><span>`assets/js/` 处理标签筛选</span></li>
-      <li><strong>样式层</strong><span>`assets/css/` 统一视觉语言</span></li>
-    </ul>
+    <div class="hero__metrics" aria-label="站点概览">
+      <div class="hero__metric">
+        <strong>{{ sorted_notes | size }}</strong>
+        <span>篇学习日记持续归档</span>
+      </div>
+      <div class="hero__metric">
+        <strong>20</strong>
+        <span>篇 / 页，翻阅更轻</span>
+      </div>
+      <div class="hero__metric">
+        <strong>Tags</strong>
+        <span>按主题聚合，不只按日期翻</span>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -46,20 +51,21 @@ layout: default
   <p class="result-text" data-results-label>共 {{ sorted_notes | size }} 篇日记</p>
 </section>
 
-<section class="note-grid" data-note-grid>
+<section class="note-feed" data-note-grid>
   {% for note in sorted_notes %}
     {% include note-card.html note=note %}
   {% endfor %}
 </section>
 
 <p class="empty-state" data-empty-state hidden>当前筛选条件下没有匹配的日记。</p>
+<nav class="pagination" aria-label="Notes pages" data-pagination hidden></nav>
 
 <script id="notes-data" type="application/json">
 [
   {% for note in sorted_notes %}
     {
       "title": {{ note.title | jsonify }},
-      "url": {{ note.url | relative_url | jsonify }},
+      "url": {{ site.baseurl | append: note.url | jsonify }},
       "date": {{ note.date | date: "%Y-%m-%d" | jsonify }},
       "summary": {{ note.summary | default: note.excerpt | strip_html | strip_newlines | normalize_whitespace | truncate: 160 | jsonify }},
       "tags": {{ note.tags | default: empty | jsonify }}
@@ -67,4 +73,3 @@ layout: default
   {% endfor %}
 ]
 </script>
-

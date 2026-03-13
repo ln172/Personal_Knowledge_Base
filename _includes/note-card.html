@@ -9,18 +9,19 @@
   data-tags="{{ note_tags | join: ',' | downcase | escape }}"
   data-search="{{ note_search_blob | downcase | escape }}"
 >
-  <div class="note-card__meta">
-    <span>{{ note_item.date | date: "%Y.%m.%d" }}</span>
-    <span>{{ note_tags | size }} 个标签</span>
+  <div class="note-card__rail">
+    <span class="note-card__date">{{ note_item.date | date: "%Y.%m.%d" }}</span>
+    <span class="note-card__tag-count">{{ note_tags | size }} 个标签</span>
   </div>
-  <h3 class="note-card__title">
-    <a href="{{ note_item.url | relative_url }}">{{ note_item.title }}</a>
-  </h3>
-  <p class="note-card__summary">{{ note_summary }}</p>
-  <div class="tag-list">
-    {% for tag in note_tags %}
-      <a class="tag-pill" href="{{ '/tags/' | relative_url }}?tag={{ tag | uri_escape }}">#{{ tag }}</a>
-    {% endfor %}
+  <div class="note-card__body">
+    <h3 class="note-card__title">
+      <a href="{{ site.baseurl }}{{ note_item.url }}">{{ note_item.title }}</a>
+    </h3>
+    <p class="note-card__summary">{{ note_summary }}</p>
+    <div class="tag-list">
+      {% for tag in note_tags %}
+        <a class="tag-pill" href="{{ site.baseurl }}/tags/?tag={{ tag | uri_escape }}">#{{ tag }}</a>
+      {% endfor %}
+    </div>
   </div>
 </article>
-

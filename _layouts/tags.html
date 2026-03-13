@@ -41,7 +41,7 @@ layout: default
   {% for note in sorted_notes %}
     {
       "title": {{ note.title | jsonify }},
-      "url": {{ note.url | relative_url | jsonify }},
+      "url": {{ site.baseurl | append: note.url | jsonify }},
       "date": {{ note.date | date: "%Y-%m-%d" | jsonify }},
       "summary": {{ note.summary | default: note.excerpt | strip_html | strip_newlines | normalize_whitespace | truncate: 160 | jsonify }},
       "tags": {{ note.tags | default: empty | jsonify }}
@@ -49,4 +49,3 @@ layout: default
   {% endfor %}
 ]
 </script>
-

@@ -53,12 +53,15 @@
   var tagFilterContainers = Array.prototype.slice.call(document.querySelectorAll("[data-tag-filter]"));
   var searchInputs = Array.prototype.slice.call(document.querySelectorAll("[data-note-search]"));
   var clearButtons = Array.prototype.slice.call(document.querySelectorAll("[data-clear-filters]"));
+  var paginationContainers = Array.prototype.slice.call(document.querySelectorAll("[data-pagination]"));
   var resultsLabel = document.querySelector("[data-results-label]");
   var emptyState = document.querySelector("[data-empty-state]");
   var tagDirectory = document.querySelector("[data-tag-sections]");
+  var pageSize = 20;
   var state = {
     keyword: "",
-    activeTags: []
+    activeTags: [],
+    page: 1
   };
 
   if (!notes.length) {
@@ -69,6 +72,7 @@
     var params = new URLSearchParams(window.location.search);
     var tagValue = params.get("tags") || params.get("tag") || "";
     var keywordValue = params.get("q") || "";
+    var pageValue = parseInt(params.get("page") || "1", 10);
 
     state.activeTags = tagValue
       .split(",")
@@ -77,6 +81,7 @@
       })
       .filter(Boolean);
     state.keyword = normalizeText(keywordValue);
+    state.page = Number.isFinite(pageValue) && pageValue > 0 ? pageValue : 1;
   }
 
   function writeStateToUrl() {
@@ -94,6 +99,12 @@
       params.set("q", state.keyword);
     } else {
       params.delete("q");
+    }
+
+    if (cards.length && state.page > 1) {
+      params.set("page", String(state.page));
+    } else {
+      params.delete("page");
     }
 
     var query = params.toString();
@@ -145,6 +156,79 @@
     });
   }
 
+  function buildVisiblePages(totalPages, currentPage) {
+    var candidates = [1, totalPages, currentPage - 1, currentPage, currentPage + 1];
+    var pages = candidates.filter(function (page) {
+      return page >= 1 && page <= totalPages;
+    });
+
+    return pages.filter(function (page, index) {
+      return pages.indexOf(page) === index;
+    }).sort(function (left, right) {
+      return left - right;
+    });
+  }
+
+  function renderPagination(totalPages, totalCount) {
+    if (!paginationContainers.length) {
+      return;
+    }
+
+    paginationContainers.forEach(function (container) {
+      container.innerHTML = "";
+
+      if (totalCount === 0 || totalPages <= 1) {
+        container.hidden = true;
+        return;
+      }
+
+      container.hidden = false;
+
+      var fragment = document.createDocumentFragment();
+
+      function appendButton(label, targetPage, options) {
+        var button = document.createElement("button");
+        button.className = "pagination__button";
+        button.type = "button";
+        button.textContent = label;
+
+        if (options && options.current) {
+          button.classList.add("is-current");
+          button.setAttribute("aria-current", "page");
+          button.disabled = true;
+        } else {
+          button.dataset.pageTarget = String(targetPage);
+        }
+
+        if (options && options.disabled) {
+          button.disabled = true;
+        }
+
+        fragment.appendChild(button);
+      }
+
+      function appendEllipsis() {
+        var ellipsis = document.createElement("span");
+        ellipsis.className = "pagination__ellipsis";
+        ellipsis.textContent = "...";
+        fragment.appendChild(ellipsis);
+      }
+
+      appendButton("上一页", state.page - 1, { disabled: state.page === 1 });
+
+      buildVisiblePages(totalPages, state.page).forEach(function (page, index, pages) {
+        if (index > 0 && page - pages[index - 1] > 1) {
+          appendEllipsis();
+        }
+
+        appendButton(String(page), page, { current: page === state.page });
+      });
+
+      appendButton("下一页", state.page + 1, { disabled: state.page === totalPages });
+      container.appendChild(fragment);
+    });
+  }
+
   function getFilteredNotes() {
     return notes.filter(function (note) {
       var normalizedTags = (note.tags || []).map(normalizeTag);
@@ -166,8 +250,13 @@
       return;
     }
 
+    var totalPages = Math.max(1, Math.ceil(filteredNotes.length / pageSize));
+    state.page = Math.min(Math.max(state.page, 1), totalPages);
+
+    var start = (state.page - 1) * pageSize;
+    var end = start + pageSize;
     var visibleUrls = new Set(
-      filteredNotes.map(function (note) {
+      filteredNotes.slice(start, end).map(function (note) {
         return note.url;
       })
     );
@@ -186,11 +275,17 @@
       }
     });
 
-    setResultsText("共 " + visibleCount + " 篇日记");
+    if (filteredNotes.length === 0) {
+      setResultsText("共 0 篇日记");
+    } else {
+      setResultsText("共 " + filteredNotes.length + " 篇日记，第 " + state.page + " / " + totalPages + " 页");
+    }
 
     if (emptyState) {
-      emptyState.hidden = visibleCount > 0;
+      emptyState.hidden = filteredNotes.length > 0;
     }
+
+    renderPagination(totalPages, filteredNotes.length);
   }
 
   function buildTagDirectory(filteredNotes) {
@@ -289,10 +384,11 @@
     renderTagFilters();
     updateSearchInputs();
     updateClearButtons();
-    writeStateToUrl();
 
     if (cards.length) {
       applyCardFiltering(filteredNotes);
+    } else {
+      state.page = 1;
     }
 
     if (tagDirectory) {
@@ -300,6 +396,8 @@
     } else if (!cards.length && emptyState) {
       emptyState.hidden = filteredNotes.length > 0;
     }
+
+    writeStateToUrl();
   }
 
   function toggleTag(tagValue) {
@@ -315,9 +413,11 @@
   document.addEventListener("click", function (event) {
     var chip = event.target.closest("[data-tag-value]");
     var clearButton = event.target.closest("[data-clear-filters]");
+    var pageButton = event.target.closest("[data-page-target]");
 
     if (chip) {
       toggleTag(chip.dataset.tagValue);
+      state.page = 1;
       applyFilters();
       return;
     }
@@ -325,6 +425,13 @@
     if (clearButton) {
       state.activeTags = [];
       state.keyword = "";
+      state.page = 1;
+      applyFilters();
+      return;
+    }
+
+    if (pageButton) {
+      state.page = parseInt(pageButton.dataset.pageTarget || "1", 10);
       applyFilters();
     }
   });
@@ -332,6 +439,7 @@
   searchInputs.forEach(function (input) {
     input.addEventListener("input", function (event) {
       state.keyword = normalizeText(event.target.value);
+      state.page = 1;
       applyFilters();
     });
   });
@@ -339,4 +447,3 @@
   readStateFromUrl();
   applyFilters();
 })();
-

@@ -14,7 +14,7 @@ layout: default
     {% endif %}
     <div class="tag-list">
       {% for tag in page.tags %}
-        <a class="tag-pill" href="{{ '/tags/' | relative_url }}?tag={{ tag | uri_escape }}">#{{ tag }}</a>
+        <a class="tag-pill" href="{{ site.baseurl }}/tags/?tag={{ tag | uri_escape }}">#{{ tag }}</a>
       {% endfor %}
     </div>
   </div>
@@ -24,8 +24,7 @@ layout: default
   </div>
 
   <div class="note-page__footer">
-    <a class="button button--ghost" href="{{ '/' | relative_url }}">返回首页</a>
-    <a class="button button--ghost" href="{{ '/tags/' | relative_url }}">查看全部标签</a>
+    <a class="button button--ghost" href="{{ site.baseurl }}/">返回首页</a>
+    <a class="button button--ghost" href="{{ site.baseurl }}/tags/">查看全部标签</a>
   </div>
 </article>
-
