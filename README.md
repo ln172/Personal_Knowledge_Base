@@ -86,6 +86,14 @@ bundle exec jekyll serve
 3. 选择从默认分支部署。
 4. GitHub 会自动用 Jekyll 构建这个站点。
 
+因为这是仓库 `Personal_Knowledge_Base` 下的 project site，默认访问地址会是：
+
+```text
+https://ln172.github.io/Personal_Knowledge_Base/
+```
+
+这个模板已经按这个路径配置好了 `baseurl`。
+
 ## 适合继续扩展的方向
 
 - 增加“按年份归档”页面

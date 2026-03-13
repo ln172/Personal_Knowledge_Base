@@ -2,7 +2,7 @@ title: Layered Learning Log
 description: 记录学习过程、沉淀笔记与思考的个人博客
 lang: zh-CN
 timezone: Asia/Shanghai
-baseurl: ""
+baseurl: "/Personal_Knowledge_Base"
 url: ""
 permalink: pretty
 markdown: kramdown
