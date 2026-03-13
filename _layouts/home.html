@@ -1,0 +1,70 @@
+---
+layout: default
+---
+{% assign sorted_notes = site.notes | sort: "date" | reverse %}
+<section class="hero hero--home">
+  <div class="hero__copy">
+    <p class="eyebrow">Learning Journal</p>
+    <h1>把每一篇学习日记，沉淀成可以检索的个人知识轨迹。</h1>
+    <p class="hero__lead">
+      所有日记都放在单独的 Markdown 文件里，页面会自动渲染内容、汇总标签，并支持按标签筛选。
+    </p>
+    <div class="hero__actions">
+      <a class="button" href="#notes">开始浏览</a>
+      <a class="button button--ghost" href="{{ '/tags/' | relative_url }}">看标签地图</a>
+    </div>
+  </div>
+  <div class="hero__panel">
+    <p class="panel__label">当前结构</p>
+    <ul class="stack-list">
+      <li><strong>内容层</strong><span>`_notes/` 中的 Markdown 日记</span></li>
+      <li><strong>布局层</strong><span>`_layouts/` 控制页面渲染</span></li>
+      <li><strong>交互层</strong><span>`assets/js/` 处理标签筛选</span></li>
+      <li><strong>样式层</strong><span>`assets/css/` 统一视觉语言</span></li>
+    </ul>
+  </div>
+</section>
+
+<section class="control-panel" id="notes">
+  <div class="control-panel__head">
+    <div>
+      <p class="eyebrow">Filter Notes</p>
+      <h2>按标签和关键词找日记</h2>
+    </div>
+    <button class="button button--ghost" type="button" data-clear-filters hidden>清空筛选</button>
+  </div>
+  <div class="search-row">
+    <label class="search-row__field" for="note-search">
+      <span>关键词</span>
+      <input id="note-search" type="search" placeholder="搜索标题、摘要或标签" data-note-search>
+    </label>
+    <div>
+      <span class="search-row__label">标签</span>
+      <div class="tag-filter" data-tag-filter></div>
+    </div>
+  </div>
+  <p class="result-text" data-results-label>共 {{ sorted_notes | size }} 篇日记</p>
+</section>
+
+<section class="note-grid" data-note-grid>
+  {% for note in sorted_notes %}
+    {% include note-card.html note=note %}
+  {% endfor %}
+</section>
+
+<p class="empty-state" data-empty-state hidden>当前筛选条件下没有匹配的日记。</p>
+
+<script id="notes-data" type="application/json">
+[
+  {% for note in sorted_notes %}
+    {
+      "title": {{ note.title | jsonify }},
+      "url": {{ note.url | relative_url | jsonify }},
+      "date": {{ note.date | date: "%Y-%m-%d" | jsonify }},
+      "summary": {{ note.summary | default: note.excerpt | strip_html | strip_newlines | normalize_whitespace | truncate: 160 | jsonify }},
+      "tags": {{ note.tags | default: empty | jsonify }}
+    }{% unless forloop.last %},{% endunless %}
+  {% endfor %}
+]
+</script>
+

@@ -1,0 +1,17 @@
+---
+layout: default
+---
+<section class="hero hero--page">
+  <div class="hero__copy">
+    <p class="eyebrow">Page</p>
+    <h1>{{ page.title }}</h1>
+    {% if page.description %}
+      <p class="hero__lead">{{ page.description }}</p>
+    {% endif %}
+  </div>
+</section>
+
+<section class="content-panel">
+  {{ content }}
+</section>
+

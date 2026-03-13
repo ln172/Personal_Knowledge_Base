@@ -1,0 +1,26 @@
+title: Layered Learning Log
+description: 记录学习过程、沉淀笔记与思考的个人博客
+lang: zh-CN
+timezone: Asia/Shanghai
+baseurl: ""
+url: ""
+permalink: pretty
+markdown: kramdown
+kramdown:
+  input: GFM
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - .bundle
+collections:
+  notes:
+    output: true
+    permalink: /notes/:path/
+defaults:
+  - scope:
+      path: ""
+      type: notes
+    values:
+      layout: note

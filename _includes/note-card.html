@@ -1,0 +1,26 @@
+{% assign note_item = include.note %}
+{% assign note_tags = note_item.tags | default: empty %}
+{% assign note_summary = note_item.summary | default: note_item.excerpt | strip_html | strip_newlines | normalize_whitespace %}
+{% assign note_tag_search = note_tags | join: " " %}
+{% assign note_search_blob = note_item.title | append: " " | append: note_summary | append: " " | append: note_tag_search %}
+<article
+  class="note-card"
+  data-note-card
+  data-tags="{{ note_tags | join: ',' | downcase | escape }}"
+  data-search="{{ note_search_blob | downcase | escape }}"
+>
+  <div class="note-card__meta">
+    <span>{{ note_item.date | date: "%Y.%m.%d" }}</span>
+    <span>{{ note_tags | size }} 个标签</span>
+  </div>
+  <h3 class="note-card__title">
+    <a href="{{ note_item.url | relative_url }}">{{ note_item.title }}</a>
+  </h3>
+  <p class="note-card__summary">{{ note_summary }}</p>
+  <div class="tag-list">
+    {% for tag in note_tags %}
+      <a class="tag-pill" href="{{ '/tags/' | relative_url }}?tag={{ tag | uri_escape }}">#{{ tag }}</a>
+    {% endfor %}
+  </div>
+</article>
+
