@@ -4,4 +4,7 @@ _site/
 .jekyll-metadata
 .bundle/
 vendor/
-
+.git-credentials
+.git-helpers/
+.env.local
+.secrets/
